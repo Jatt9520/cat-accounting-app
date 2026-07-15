@@ -108,7 +108,7 @@ const Storage = {
         const index = records.findIndex(r => r.id === id);
         if (index !== -1) {
             records.splice(index, 1);
-            this.saveRecords(records);
+            this.saveRecords(records);  // 支持部分恢复：仅更新records，不影响分类
             return true;
         }
         return false;
@@ -125,7 +125,7 @@ const Storage = {
         const index = records.findIndex(r => r.id === id);
         if (index !== -1) {
             records[index] = { ...records[index], ...updates };
-            this.saveRecords(records);
+            this.saveRecords(records);  // 支持部分恢复：仅更新records，不影响分类
             return records[index];
         }
         return null;
@@ -212,7 +212,7 @@ const Storage = {
      */
     getWeekRecords() {
         const now = new Date();
-        const dayOfWeek = now.getDay() || 7; // 周日为7
+        const dayOfWeek = now.getDay() || 7;  // getDay()周日返回0，转为7（以周一为起始） // 周日为7
         const startDate = new Date(now);
         startDate.setDate(now.getDate() - dayOfWeek + 1);
         const endDate = new Date(now);
