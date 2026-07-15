@@ -165,7 +165,7 @@ const App = {
         document.querySelectorAll('.category-item').forEach(item => {
             item.classList.remove('selected');
         });
-        event.currentTarget.classList.add('selected');
+        event.currentTarget.classList.add('selected'); // 注意：event是隐式全局变量，依赖浏览器环境（非标准，但在此上下文中可用）
     },
 
     /**
@@ -180,7 +180,7 @@ const App = {
         const note = noteInput.value.trim();
         const date = dateInput.value;
 
-        // 验证
+        // 验证序列：依次检查金额、分类、日期，任一无效则提示并返回
         if (!amount || amount <= 0) {
             this.showToast('请输入有效金额');
             return;
@@ -230,9 +230,9 @@ const App = {
     loadHomePage() {
         // 更新本月汇总
         const monthSummary = Storage.calculateSummary(Storage.getMonthRecords());
-        document.getElementById('monthIncome').textContent = `¥${monthSummary.income.toFixed(2)}`;
-        document.getElementById('monthExpense').textContent = `¥${monthSummary.expense.toFixed(2)}`;
-        document.getElementById('monthBalance').textContent = `¥${monthSummary.balance.toFixed(2)}`;
+        document.getElementById('monthIncome').textContent = `￥${monthSummary.income.toFixed(2)}`;
+        document.getElementById('monthExpense').textContent = `￥${monthSummary.expense.toFixed(2)}`;
+        document.getElementById('monthBalance').textContent = `￥${monthSummary.balance.toFixed(2)}`;
 
         // 加载最近记录
         this.loadRecentRecords();
@@ -248,7 +248,7 @@ const App = {
         if (records.length === 0) {
             recentRecords.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📝</div>
+                    <div class="empty-icon">??</div>
                     <p>还没有记录哦，快来记一笔吧~</p>
                 </div>
             `;
@@ -266,7 +266,7 @@ const App = {
     createRecordHTML(record) {
         const category = Storage.getCategoryById(record.category);
         const categoryName = category ? category.name : record.category;
-        const categoryIcon = category ? category.icon : '📦';
+        const categoryIcon = category ? category.icon : '??';
         const isIncome = record.type === 'income';
         const amountClass = isIncome ? 'income' : 'expense';
         const amountPrefix = isIncome ? '+' : '-';
@@ -281,7 +281,7 @@ const App = {
                     <div class="record-note">${record.note || '无备注'}</div>
                 </div>
                 <div class="record-amount ${amountClass}">
-                    ${amountPrefix}¥${record.amount.toFixed(2)}
+                    ${amountPrefix}￥${record.amount.toFixed(2)}
                 </div>
                 <div class="record-date">${this.formatDate(record.date)}</div>
             </div>
@@ -311,12 +311,12 @@ const App = {
     /**
      * 加载统计页面
      */
-    loadStatsPage() {
+    loadStatsPage() { // 数据流：获取汇总数据 → 获取分类统计 → 绘制饼图 → 获取趋势数据 → 绘制趋势图
         // 更新汇总数据
         const summary = Statistics.getSummary(this.currentStatsPeriod);
-        document.getElementById('statsIncome').textContent = `¥${summary.income.toFixed(2)}`;
-        document.getElementById('statsExpense').textContent = `¥${summary.expense.toFixed(2)}`;
-        document.getElementById('statsBalance').textContent = `¥${summary.balance.toFixed(2)}`;
+        document.getElementById('statsIncome').textContent = `￥${summary.income.toFixed(2)}`;
+        document.getElementById('statsExpense').textContent = `￥${summary.expense.toFixed(2)}`;
+        document.getElementById('statsBalance').textContent = `￥${summary.balance.toFixed(2)}`;
 
         // 绘制饼图
         const categoryStats = Statistics.getCategoryStats(this.currentStatsPeriod, 'expense');
@@ -409,7 +409,7 @@ const App = {
         if (records.length === 0) {
             allRecords.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">📋</div>
+                    <div class="empty-icon">??</div>
                     <p>没有找到匹配的记录</p>
                 </div>
             `;
@@ -431,12 +431,12 @@ const App = {
 
         const category = Storage.getCategoryById(record.category);
         const categoryName = category ? category.name : record.category;
-        const categoryIcon = category ? category.icon : '📦';
+        const categoryIcon = category ? category.icon : '??';
         const isIncome = record.type === 'income';
 
         // 显示确认对话框
         this.showConfirm(
-            `${categoryIcon} ${categoryName}\n金额: ${isIncome ? '+' : '-'}¥${record.amount.toFixed(2)}\n备注: ${record.note || '无'}\n日期: ${record.date}\n\n确定要删除这条记录吗？`,
+            `${categoryIcon} ${categoryName}\n金额: ${isIncome ? '+' : '-'}￥${record.amount.toFixed(2)}\n备注: ${record.note || '无'}\n日期: ${record.date}\n\n确定要删除这条记录吗？`,
             () => {
                 Storage.deleteRecord(recordId);
                 this.showToast('记录已删除');
@@ -564,3 +564,4 @@ const App = {
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });
+
