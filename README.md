@@ -151,10 +151,6 @@ cd android
 
 本项目基于 [MIT License](LICENSE) 开源。
 
-## 👨‍💻 作者
-
-- GitHub: [@Jatt9520](https://github.com/Jatt9520)
-
 ## 🙏 致谢
 
 感谢所有开源项目的贡献者！
