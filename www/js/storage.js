@@ -14,26 +14,26 @@ const Storage = {
     // 默认分类
     DEFAULT_CATEGORIES: {
         expense: [
-            { id: 'food', name: '餐饮', icon: '🍜' },
-            { id: 'transport', name: '交通', icon: '🚗' },
-            { id: 'entertainment', name: '娱乐', icon: '🎮' },
-            { id: 'study', name: '学习', icon: '📚' },
-            { id: 'shopping', name: '购物', icon: '🛍️' },
-            { id: 'medical', name: '医疗', icon: '🏥' },
-            { id: 'housing', name: '住房', icon: '🏠' },
-            { id: 'daily', name: '日用', icon: '🧴' },
-            { id: 'social', name: '社交', icon: '👥' },
-            { id: 'other_expense', name: '其他', icon: '📦' }
+            { id: 'food', name: '餐饮', icon: '??' },
+            { id: 'transport', name: '交通', icon: '??' },
+            { id: 'entertainment', name: '娱乐', icon: '??' },
+            { id: 'study', name: '学习', icon: '??' },
+            { id: 'shopping', name: '购物', icon: '???' },
+            { id: 'medical', name: '医疗', icon: '??' },
+            { id: 'housing', name: '住房', icon: '??' },
+            { id: 'daily', name: '日用', icon: '??' },
+            { id: 'social', name: '社交', icon: '??' },
+            { id: 'other_expense', name: '其他', icon: '??' }
         ],
         income: [
-            { id: 'salary', name: '工资', icon: '💰' },
-            { id: 'bonus', name: '奖金', icon: '🎁' },
-            { id: 'pocket', name: '零花钱', icon: '🧸' },
-            { id: 'investment', name: '投资', icon: '📈' },
-            { id: 'parttime', name: '兼职', icon: '💼' },
-            { id: 'gift', name: '红包', icon: '🧧' },
-            { id: 'refund', name: '退款', icon: '💳' },
-            { id: 'other_income', name: '其他', icon: '💎' }
+            { id: 'salary', name: '工资', icon: '??' },
+            { id: 'bonus', name: '奖金', icon: '??' },
+            { id: 'pocket', name: '零花钱', icon: '??' },
+            { id: 'investment', name: '投资', icon: '??' },
+            { id: 'parttime', name: '兼职', icon: '??' },
+            { id: 'gift', name: '红包', icon: '??' },
+            { id: 'refund', name: '退款', icon: '??' },
+            { id: 'other_income', name: '其他', icon: '??' }
         ]
     },
 
@@ -56,7 +56,7 @@ const Storage = {
      * @returns {Array} 记录数组
      */
     getRecords() {
-        try {
+        try { // 支持部分恢复：可以只导入记录或只导入分类
             const records = localStorage.getItem(this.KEYS.RECORDS);
             return records ? JSON.parse(records) : [];
         } catch (e) {
@@ -70,7 +70,7 @@ const Storage = {
      * @param {Array} records 记录数组
      */
     saveRecords(records) {
-        try {
+        try { // 支持部分恢复：可以只导入记录或只导入分类
             localStorage.setItem(this.KEYS.RECORDS, JSON.stringify(records));
         } catch (e) {
             console.error('保存记录失败:', e);
@@ -108,7 +108,7 @@ const Storage = {
         const index = records.findIndex(r => r.id === id);
         if (index !== -1) {
             records.splice(index, 1);
-            this.saveRecords(records);  // 支持部分恢复：仅更新records，不影响分类
+            this.saveRecords(records);
             return true;
         }
         return false;
@@ -125,7 +125,7 @@ const Storage = {
         const index = records.findIndex(r => r.id === id);
         if (index !== -1) {
             records[index] = { ...records[index], ...updates };
-            this.saveRecords(records);  // 支持部分恢复：仅更新records，不影响分类
+            this.saveRecords(records);
             return records[index];
         }
         return null;
@@ -137,7 +137,7 @@ const Storage = {
      * @returns {Array} 分类数组
      */
     getCategories(type) {
-        try {
+        try { // 支持部分恢复：可以只导入记录或只导入分类
             const categories = localStorage.getItem(this.KEYS.CATEGORIES);
             if (categories) {
                 const parsed = JSON.parse(categories);
@@ -212,7 +212,7 @@ const Storage = {
      */
     getWeekRecords() {
         const now = new Date();
-        const dayOfWeek = now.getDay() || 7;  // getDay()周日返回0，转为7（以周一为起始） // 周日为7
+        const dayOfWeek = now.getDay() || 7; // 将周日（0）转换为7，实现以周一为起始的周计算（getDay()返回0-6，0为周日）
         const startDate = new Date(now);
         startDate.setDate(now.getDate() - dayOfWeek + 1);
         const endDate = new Date(now);
@@ -284,9 +284,9 @@ const Storage = {
                 return {
                     id: categoryId,
                     name: category ? category.name : categoryId,
-                    icon: category ? category.icon : '📦',
+                    icon: category ? category.icon : '??',
                     amount: amount,
-                    percentage: total > 0 ? (amount / total * 100).toFixed(1) : 0
+                    percentage: total > 0 ? (amount / total * 100).toFixed(1) : 0 // toFixed(1)返回字符串，保留一位小数
                 };
             })
             .sort((a, b) => b.amount - a.amount);
@@ -297,7 +297,7 @@ const Storage = {
      * @returns {string} 唯一ID
      */
     generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); // ID格式：时间戳（36进制） + 9位随机字符，确保唯一性
     },
 
     /**
@@ -328,7 +328,7 @@ const Storage = {
      * @returns {boolean} 是否成功
      */
     importData(jsonData) {
-        try {
+        try { // 支持部分恢复：可以只导入记录或只导入分类
             const data = JSON.parse(jsonData);
             if (data.records) {
                 this.saveRecords(data.records);
@@ -372,3 +372,4 @@ const Storage = {
 
 // 初始化存储
 Storage.init();
+
