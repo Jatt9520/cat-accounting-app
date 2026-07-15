@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: gap:">
+    <title>猫咪记账</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 启动画面 -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-cat">🐱</div>
+            <h1>猫咪记账</h1>
+            <p>记录每一笔，攒下每一分</p>
+        </div>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="app" class="app hidden">
+        <!-- 顶部状态栏 -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">🐱 猫咪记账</h1>
+                <div class="header-date" id="headerDate"></div>
+            </div>
+        </header>
+
+        <!-- 页面容器 -->
+        <main class="main-content">
+            <!-- 首页 -->
+            <section id="page-home" class="page active">
+                <div class="home-summary">
+                    <div class="summary-card">
+                        <div class="summary-item income">
+                            <span class="summary-label">本月收入</span>
+                            <span class="summary-amount" id="monthIncome">¥0.00</span>
+                        </div>
+                        <div class="summary-item expense">
+                            <span class="summary-label">本月支出</span>
+                            <span class="summary-amount" id="monthExpense">¥0.00</span>
+                        </div>
+                        <div class="summary-item balance">
+                            <span class="summary-label">本月结余</span>
+                            <span class="summary-amount" id="monthBalance">¥0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2>最近账单</h2>
+                    <button class="btn-more" onclick="App.showPage('records')">查看全部</button>
+                </div>
+                <div id="recentRecords" class="record-list">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>还没有记录哦，快来记一笔吧~</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 记账页面 -->
+            <section id="page-add" class="page">
+                <div class="add-form">
+                    <div class="type-toggle">
+                        <button class="type-btn active" data-type="expense" onclick="App.switchType('expense')">支出</button>
+                        <button class="type-btn" data-type="income" onclick="App.switchType('income')">收入</button>
+                    </div>
+
+                    <div class="amount-input">
+                        <span class="currency-symbol">¥</span>
+                        <input type="number" id="amountInput" placeholder="0.00" step="0.01" min="0">
+                    </div>
+
+                    <div class="category-section">
+                        <h3>选择分类</h3>
+                        <div id="categoryGrid" class="category-grid"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>备注</label>
+                        <input type="text" id="noteInput" placeholder="添加备注（可选）">
+                    </div>
+
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" id="dateInput">
+                    </div>
+
+                    <button class="btn-save" onclick="App.saveRecord()">
+                        <span class="btn-icon">💾</span>
+                        保存记录
+                    </button>
+                </div>
+            </section>
+
+            <!-- 统计页面 -->
+            <section id="page-stats" class="page">
+                <div class="stats-tabs">
+                    <button class="stats-tab active" data-period="week" onclick="App.switchStatsPeriod('week')">本周</button>
+                    <button class="stats-tab" data-period="month" onclick="App.switchStatsPeriod('month')">本月</button>
+                    <button class="stats-tab" data-period="year" onclick="App.switchStatsPeriod('year')">本年</button>
+                </div>
+
+                <div class="stats-summary">
+                    <div class="stats-card">
+                        <div class="stats-item">
+                            <span class="stats-label">总收入</span>
+                            <span class="stats-amount income" id="statsIncome">¥0.00</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-label">总支出</span>
+                            <span class="stats-amount expense" id="statsExpense">¥0.00</span>
+                        </div>
+                        <div class="stats-item">
+                            <span class="stats-label">结余</span>
+                            <span class="stats-amount" id="statsBalance">¥0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h3>支出分类占比</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart" width="300" height="300"></canvas>
+                    </div>
+                    <div id="categoryLegend" class="category-legend"></div>
+                </div>
+
+                <div class="trend-section">
+                    <h3>收支趋势</h3>
+                    <div class="trend-container">
+                        <canvas id="trendChart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 记录列表页面 -->
+            <section id="page-records" class="page">
+                <div class="records-filter">
+                    <select id="filterType" onchange="App.filterRecords()">
+                        <option value="all">全部类型</option>
+                        <option value="income">收入</option>
+                        <option value="expense">支出</option>
+                    </select>
+                    <select id="filterCategory" onchange="App.filterRecords()">
+                        <option value="all">全部分类</option>
+                    </select>
+                </div>
+                <div id="allRecords" class="record-list"></div>
+            </section>
+        </main>
+
+        <!-- 底部导航栏 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home" onclick="App.showPage('home')">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">首页</span>
+            </button>
+            <button class="nav-item" data-page="records" onclick="App.showPage('records')">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">账单</span>
+            </button>
+            <button class="nav-item add-btn" onclick="App.showPage('add')">
+                <span class="nav-icon">➕</span>
+            </button>
+            <button class="nav-item" data-page="stats" onclick="App.showPage('stats')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">统计</span>
+            </button>
+            <button class="nav-item" data-page="settings" onclick="App.showSettings()">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">设置</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- 猫咪弹窗 -->
+    <div id="catPopup" class="cat-popup hidden">
+        <div class="cat-popup-content">
+            <div class="cat-emoji" id="catEmoji"></div>
+            <div class="cat-message" id="catMessage"></div>
+        </div>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>设置</h2>
+                <button class="modal-close" onclick="App.hideSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-item">
+                    <span>清除所有数据</span>
+                    <button class="btn-danger" onclick="App.clearAllData()">清除</button>
+                </div>
+                <div class="settings-item">
+                    <span>导出数据</span>
+                    <button class="btn-secondary" onclick="App.exportData()">导出</button>
+                </div>
+                <div class="settings-item">
+                    <span>关于</span>
+                    <span class="settings-info">猫咪记账 v1.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div id="confirmModal" class="modal hidden">
+        <div class="modal-content confirm">
+            <div class="modal-body">
+                <p id="confirmMessage">确定要执行此操作吗？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="App.hideConfirm()">取消</button>
+                <button class="btn-primary" id="confirmBtn" onclick="App.confirmAction()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/cat-popup.js"></script>
+    <script src="js/statistics.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
