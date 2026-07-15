@@ -43,10 +43,10 @@ const Statistics = {
         if (total === 0) return;
 
         // 绘制饼图
-        let startAngle = -Math.PI / 2;
+        let startAngle = -Math.PI / 2; // 从12点方向开始（-90度），Canvas坐标系中0度在3点方向
 
         data.forEach((item, index) => {
-            const sliceAngle = (item.value / total) * 2 * Math.PI;
+            const sliceAngle = (item.value / total) * 2 * Math.PI; // 计算每个扇形的角度，占比 * 整个圆（2π弧度）
             const endAngle = startAngle + sliceAngle;
 
             // 绘制扇形
@@ -66,10 +66,10 @@ const Statistics = {
 
             // 绘制标签（如果扇形足够大）
             if (sliceAngle > 0.3) {
-                const labelAngle = startAngle + sliceAngle / 2;
-                const labelRadius = radius * 0.7;
-                const labelX = centerX + Math.cos(labelAngle) * labelRadius;
-                const labelY = centerY + Math.sin(labelAngle) * labelRadius;
+                const labelAngle = startAngle + sliceAngle / 2; // 标签角度：扇形起始角度 + 扇形角度的一半（即扇形中间位置）
+                const labelRadius = radius * 0.7; // 标签半径：饼图半径的70%，使标签位于扇形内部
+                const labelX = centerX + Math.cos(labelAngle) * labelRadius; // 极坐标转笛卡尔坐标：X = 圆心X + cos(角度) * 半径
+                const labelY = centerY + Math.sin(labelAngle) * labelRadius; // 极坐标转笛卡尔坐标：Y = 圆心Y + sin(角度) * 半径
 
                 // 绘制百分比
                 ctx.fillStyle = '#fff';
@@ -96,7 +96,7 @@ const Statistics = {
         ctx.fillText('支出', centerX, centerY - 10);
         ctx.font = '12px sans-serif';
         ctx.fillStyle = '#666';
-        ctx.fillText(`¥${total.toFixed(2)}`, centerX, centerY + 15);
+        ctx.fillText(`￥${total.toFixed(2)}`, centerX, centerY + 15);
     },
 
     /**
@@ -134,7 +134,7 @@ const Statistics = {
         );
 
         // 计算刻度
-        const yScale = chartHeight / maxValue;
+        const yScale = chartHeight / maxValue; // Y轴缩放比例：将数据值映射到画布高度
         const xScale = chartWidth / (data.length - 1 || 1);
 
         // 绘制背景网格
@@ -155,7 +155,7 @@ const Statistics = {
         ctx.textBaseline = 'middle';
         for (let i = 0; i <= 5; i++) {
             const y = padding.top + (chartHeight / 5) * i;
-            const value = maxValue - (maxValue / 5) * i;
+            const value = maxValue - (maxValue / 5) * i; // Y轴反转：Canvas的Y轴是从上到下，所以要从最大值递减
             ctx.fillText(value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value.toFixed(0), padding.left - 10, y);
         }
 
@@ -205,7 +205,7 @@ const Statistics = {
 
         data.forEach((item, index) => {
             const x = padding.left + index * xScale;
-            const y = padding.top + (1 - item[key] * yScale / (ctx.canvas.height - padding.top - padding.bottom)) * (ctx.canvas.height - padding.top - padding.bottom);
+            const y = padding.top + (1 - item[key] * yScale / (ctx.canvas.height - padding.top - padding.bottom)) * (ctx.canvas.height - padding.top - padding.bottom); // Y坐标：Canvas的Y轴从上到下，所以用1减去比例实现反转
 
             if (index === 0) {
                 ctx.moveTo(x, y);
@@ -219,7 +219,7 @@ const Statistics = {
         // 绘制数据点
         data.forEach((item, index) => {
             const x = padding.left + index * xScale;
-            const y = padding.top + (1 - item[key] * yScale / (ctx.canvas.height - padding.top - padding.bottom)) * (ctx.canvas.height - padding.top - padding.bottom);
+            const y = padding.top + (1 - item[key] * yScale / (ctx.canvas.height - padding.top - padding.bottom)) * (ctx.canvas.height - padding.top - padding.bottom); // Y坐标：Canvas的Y轴从上到下，所以用1减去比例实现反转
 
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2);
@@ -268,7 +268,7 @@ const Statistics = {
             <div class="legend-item">
                 <div class="legend-color" style="background-color: ${this.CHART_COLORS[index % this.CHART_COLORS.length]}"></div>
                 <span>${item.icon} ${item.name}</span>
-                <span style="color: #666; margin-left: 5px;">¥${item.amount.toFixed(2)}</span>
+                <span style="color: #666; margin-left: 5px;">￥${item.amount.toFixed(2)}</span>
             </div>
         `).join('');
     },
@@ -285,7 +285,7 @@ const Statistics = {
         switch (period) {
             case 'week':
                 // 本周数据
-                const dayOfWeek = now.getDay() || 7;
+                const dayOfWeek = now.getDay() || 7; // 将周日（0）转换为7，实现以周一为起始的周计算
                 startDate = new Date(now);
                 startDate.setDate(now.getDate() - dayOfWeek + 1);
                 endDate = new Date(now);
@@ -323,14 +323,14 @@ const Statistics = {
         if (dateFormat === 'day') {
             // 按天分组
             const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
+            while (currentDate <= endDate) { // 遍历每一天，确保没有日期缺口（即使某天没有记录也会初始化为0）
                 const dateStr = currentDate.toISOString().split('T')[0];
                 groupedData[dateStr] = { date: dateStr, income: 0, expense: 0 };
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         } else {
             // 按月分组
-            for (let month = 0; month < 12; month++) {
+            for (let month = 0; month < 12; month++) { // 按月分组：初始化12个月的数据槽位
                 const dateStr = `${now.getFullYear()}-${String(month + 1).padStart(2, '0')}`;
                 groupedData[dateStr] = { date: dateStr, income: 0, expense: 0 };
             }
@@ -408,3 +408,4 @@ const Statistics = {
         return Storage.calculateSummary(records);
     }
 };
+
