@@ -66,7 +66,7 @@ const Statistics = {
 
             // 绘制标签（如果扇形足够大）
             if (sliceAngle > 0.3) {
-                const labelAngle = startAngle + sliceAngle / 2; // 标签角度：扇形起始角度 + 扇形角度的一半（即扇形中间位置）
+                const labelAngle = startAngle + sliceAngle / 2;  // 标签位置：扇形中点角度 // 标签角度：扇形起始角度 + 扇形角度的一半（即扇形中间位置）
                 const labelRadius = radius * 0.7; // 标签半径：饼图半径的70%，使标签位于扇形内部
                 const labelX = centerX + Math.cos(labelAngle) * labelRadius; // 极坐标转笛卡尔坐标：X = 圆心X + cos(角度) * 半径
                 const labelY = centerY + Math.sin(labelAngle) * labelRadius; // 极坐标转笛卡尔坐标：Y = 圆心Y + sin(角度) * 半径
@@ -285,7 +285,7 @@ const Statistics = {
         switch (period) {
             case 'week':
                 // 本周数据
-                const dayOfWeek = now.getDay() || 7; // 将周日（0）转换为7，实现以周一为起始的周计算
+                const dayOfWeek = now.getDay() || 7;  // getDay()周日返回0，转为7（以周一为起始） // 将周日（0）转换为7，实现以周一为起始的周计算
                 startDate = new Date(now);
                 startDate.setDate(now.getDate() - dayOfWeek + 1);
                 endDate = new Date(now);
